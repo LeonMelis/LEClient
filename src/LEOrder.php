@@ -44,6 +44,7 @@ class LEOrder
 	private $orderURL;
 	private $keyType;
 	private $keySize;
+	private $OCSPMustStaple = false;
 
 	public $status;
 	public $expires;
@@ -71,11 +72,12 @@ class LEOrder
      * @param string 		$notBefore 			A date string formatted like 0000-00-00T00:00:00Z (yyyy-mm-dd hh:mm:ss) at which the certificate becomes valid.
      * @param string 		$notAfter 			A date string formatted like 0000-00-00T00:00:00Z (yyyy-mm-dd hh:mm:ss) until which the certificate is valid.
      */
-	public function __construct($connector, $log, $certificateKeys, $basename, $domains, $keyType = 'rsa-4096', $notBefore, $notAfter)
+	public function __construct($connector, $log, $certificateKeys, $basename, $domains, $keyType = 'rsa-4096', $notBefore, $notAfter, $OCSPMustStaple = false)
 	{
 		$this->connector = $connector;
 		$this->basename = $basename;
 		$this->log = $log;
+		$this->OCSPMustStaple = $OCSPMustStaple;
 
 		if ($keyType == 'rsa')
 		{
@@ -534,6 +536,18 @@ class LEOrder
         $tmpConfMeta = stream_get_meta_data($tmpConf);
         $tmpConfPath = $tmpConfMeta["uri"];
 
+        $ocsp_must_staple = '';
+
+        if ($this->OCSPMustStaple) {
+            if (OPENSSL_VERSION_NUMBER >= 0x10100000) {
+                $ocsp_must_staple = 'tlsfeature = status_request';
+            } else {
+                // OpenSSL < 1.1.0 doesn't support the status_feature directive,
+                // so we use the ASN object identifier instead
+                $ocsp_must_staple = '1.3.6.1.5.5.7.1.24 = DER:30:03:02:01:05';
+            }
+        }
+
         fwrite($tmpConf,
             'HOME = .
 			RANDFILE = $ENV::HOME/.rnd
@@ -547,7 +561,8 @@ class LEOrder
 			[ v3_req ]
 			basicConstraints = CA:FALSE
 			subjectAltName = ' . $san . '
-			keyUsage = nonRepudiation, digitalSignature, keyEncipherment');
+			keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+			' . $ocsp_must_staple );
 
 		$privateKey = openssl_pkey_get_private(file_get_contents($this->certificateKeys['private_key']));
 		$csr = openssl_csr_new($dn, $privateKey, array('config' => $tmpConfPath, 'digest_alg' => 'sha256'));
