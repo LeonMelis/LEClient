@@ -191,7 +191,14 @@ class LEClient
      */
 	public function getOrCreateOrder($basename, $domains, $keyType = 'rsa-4096', $notBefore = '', $notAfter = '', $certificateKeys = null, $OCSPMustStaple = false)
 	{
-	    if ($certificateKeys) {
+	    if ($certificateKeys)
+	    {
+            if(!file_exists($certificateKeys))
+            {
+                mkdir($certificateKeys, 0755, true);
+                LEFunctions::createhtaccess($certificateKeys);
+            }
+
             $this->certificateKeys = $this->buildKeysObj($certificateKeys);
         }
 
