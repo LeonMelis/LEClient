@@ -47,7 +47,6 @@ class LEClient
 	private $account;
 
 	private $log;
-	private $baseURL;
 
 	const LOG_OFF = 0;		// Logs no messages or faults, except Runtime Exceptions.
 	const LOG_STATUS = 1;	// Logs only messages and faults.
@@ -64,21 +63,15 @@ class LEClient
      * @param string|array  $accountKeys 		The directory in which the account keys are stored. Is a subdir inside $certificateKeys. Defaults to '__account/'.(optional)
      *                                          Optional: array containing location of account private and public keys. Required paths are private_key, public_key.
      */
-	public function __construct($email, $acmeURL = LEClient::LE_PRODUCTION, $log = LEClient::LOG_OFF, $certificateKeys = 'keys/', $accountKeys = '__account/')
+	public function __construct($email, $acmeURL = LEClient::LE_STAGING, $log = LEClient::LOG_OFF, $certificateKeys = 'keys/', $accountKeys = '__account/')
 	{
 
 		$this->log = $log;
 
-		if (is_bool($acmeURL))
+		if (!is_string($acmeURL))
 		{
-			if ($acmeURL === true) $this->baseURL = LEClient::LE_STAGING;
-			elseif ($acmeURL === false) $this->baseURL = LEClient::LE_PRODUCTION;
+            throw new \RuntimeException('acmeURL must be set to string');
 		}
-		elseif (is_string($acmeURL))
-		{
-			$this->baseURL = $acmeURL;
-		}
-		else throw new \RuntimeException('acmeURL must be set to string or bool (legacy).');
 
 		if (is_array($certificateKeys) && is_string($accountKeys)) throw new \RuntimeException('When certificateKeys is array, accountKeys must be array too.');
 		elseif (is_array($accountKeys) && is_string($certificateKeys)) throw new \RuntimeException('When accountKeys is array, certificateKeys must be array too.');
@@ -147,7 +140,7 @@ class LEClient
 		}
 
 
-		$this->connector = new LEConnector($this->log, $this->baseURL, $this->accountKeys);
+		$this->connector = new LEConnector($this->log, $acmeURL, $this->accountKeys);
 		$this->account = new LEAccount($this->connector, $this->log, $email, $this->accountKeys);
 		
 		if($this->log instanceof \Psr\Log\LoggerInterface) 
