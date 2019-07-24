@@ -170,7 +170,7 @@ class LEFunctions
     /**
      * Outputs a log message.
      *
-     * @param object	$data		The data to print.
+     * @param string	$data		The data to print.
      * @param string	$function	The function name to print above. Defaults to the calling function's name from the stacktrace. (optional)
      */
 	public static function log($data, $function = '')
