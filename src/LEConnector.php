@@ -147,7 +147,7 @@ class LEConnector
 		if(	(($method == 'POST' OR $method == 'GET') AND strpos($header, "200 OK") === false AND strpos($header, "201 Created") === false) OR
 			($method == 'HEAD' AND strpos($header, "200 OK") === false))
 		{
-			throw new \RuntimeException('Invalid response, header: ' . $header);
+			throw new \RuntimeException('Invalid response. Header: ' . $header . ' Body: ' . $body);
 		}
 
 		if(preg_match('~Replay\-Nonce: (\S+)~i', $header, $matches))
