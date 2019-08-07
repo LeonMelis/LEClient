@@ -151,11 +151,13 @@ class LEConnector
 
         $header_size = curl_getinfo($handle, CURLINFO_HEADER_SIZE);
 
+        curl_close($handle);
+
         $header = substr($response, 0, $header_size);
         $body = substr($response, $header_size);
 		$jsonbody = json_decode($body, true);
 		$jsonresponse = array('request' => $method . ' ' . $requestURL, 'header' => $header, 'body' => $jsonbody === null ? $body : $jsonbody);
-		if($this->log instanceof \Psr\Log\LoggerInterface) 
+		if($this->log instanceof \Psr\Log\LoggerInterface)
 		{
 			$this->log->debug($method . ' response received', $jsonresponse);
 		}
