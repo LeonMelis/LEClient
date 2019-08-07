@@ -37,10 +37,14 @@ namespace LEClient;
  */
 class LEConnector
 {
+    const MAX_NONCE_AGE = 60;
+
 	public $baseURL;
 	public $accountKeys;
 
 	private $nonce;
+	// The time at which this nonce was created
+	private $nonceTime;
 
 	public $keyChange;
 	public $newAccount;
@@ -89,6 +93,19 @@ class LEConnector
 	{
 		if(strpos($this->head($this->newNonce)['header'], "200 OK") == false) throw new \RuntimeException('No new nonce.');
 	}
+
+    /**
+     * LE nonces have a limited lifespan, so if we don't refresh the nonce we may get a
+     * "JWS has an invalid anti-replay nonce" error from LE.
+     *
+     * This can happen after a period of no activity. Like when this library is used
+     * in a worker that sleeps for a while.
+     */
+	private function refreshNonceIfNeeded() {
+	    if (!$this->nonce || !$this->nonceTime || abs($this->nonceTime - time()) > self::MAX_NONCE_AGE) {
+            $this->getNewNonce();
+        }
+    }
 
     /**
      * Makes a Curl request.
@@ -153,6 +170,7 @@ class LEConnector
 		if(preg_match('~Replay\-Nonce: (\S+)~i', $header, $matches))
 		{
 			$this->nonce = trim($matches[1]);
+			$this->nonceTime = time();
 		}
 		else
 		{
@@ -214,6 +232,8 @@ class LEConnector
 		$privateKey = openssl_pkey_get_private(file_get_contents($privateKeyFile));
         $details = openssl_pkey_get_details($privateKey);
 
+        $this->refreshNonceIfNeeded();
+
         $protected = array(
             "alg" => "RS256",
             "jwk" => array(
@@ -254,7 +274,8 @@ class LEConnector
     {
 		if($privateKeyFile == '') $privateKeyFile = $this->accountKeys['private_key'];
         $privateKey = openssl_pkey_get_private(file_get_contents($privateKeyFile));
-        $details = openssl_pkey_get_details($privateKey);
+
+        $this->refreshNonceIfNeeded();
 
         $protected = array(
             "alg" => "RS256",
