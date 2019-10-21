@@ -150,11 +150,13 @@ class LEConnector
         }
 
         $header_size = curl_getinfo($handle, CURLINFO_HEADER_SIZE);
+        $response_code = curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
 
         curl_close($handle);
 
         $header = substr($response, 0, $header_size);
         $body = substr($response, $header_size);
+
 		$jsonbody = json_decode($body, true);
 		$jsonresponse = array('request' => $method . ' ' . $requestURL, 'header' => $header, 'body' => $jsonbody === null ? $body : $jsonbody);
 		if($this->log instanceof \Psr\Log\LoggerInterface)
@@ -163,11 +165,17 @@ class LEConnector
 		}
 		elseif($this->log >= LECLient::LOG_DEBUG) LEFunctions::log($jsonresponse);
 
-		if(	(($method == 'POST' OR $method == 'GET') AND strpos($header, "200 OK") === false AND strpos($header, "201 Created") === false) OR
-			($method == 'HEAD' AND strpos($header, "200 OK") === false))
-		{
-			throw new \RuntimeException('Invalid response. Header: ' . $header . ' Body: ' . $body);
-		}
+		if ($response_code !== 200 && $response_code !== 201) {
+            throw new \RuntimeException('Invalid response. Header: ' . $header . ' Body: ' . $body);
+        }
+
+		// Leon: this is the old method by yourivw, but this breaks when LE responds with a HTTP/2 response,
+        // it's also not very efficient either, so we replaced this with the CURLINFO_RESPONSE_CODE
+//		if(	(($method == 'POST' OR $method == 'GET') AND strpos($header, "200 OK") === false AND strpos($header, "201 Created") === false) OR
+//			($method == 'HEAD' AND strpos($header, "200 OK") === false))
+//		{
+//			throw new \RuntimeException('Invalid response. Header: ' . $header . ' Body: ' . $body);
+//		}
 
 		if(preg_match('~Replay\-Nonce: (\S+)~i', $header, $matches))
 		{
