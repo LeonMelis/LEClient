@@ -146,7 +146,7 @@ class LEAccount
     /**
      * Updates account data. Now just supporting new contact information.
      *
-     * @param array 	$email	The array of strings containing e-mail adresses.
+     * @param array 	$email	The array of strings containing e-mail addresses.
      *
      * @return boolean	Returns true if the update is successful, false if not.
      */
