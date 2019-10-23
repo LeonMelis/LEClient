@@ -88,7 +88,7 @@ class LEAccount
      *
      * @param array 	$email 	The array of strings containing e-mail addresses.
      *
-     * @return object	Returns the new account URL when the account was successfully created, false if not.
+     * @return object|false	Returns the new account URL when the account was successfully created, false if not.
      */
 	private function createLEAccount($email)
 	{
@@ -106,7 +106,7 @@ class LEAccount
     /**
      * Gets the LetsEncrypt account URL associated with the stored account keys.
      *
-     * @return object	Returns the account URL if it is found, or false when none is found.
+     * @return object|false	Returns the account URL if it is found, or false when none is found.
      */
 	private function getLEAccount()
 	{

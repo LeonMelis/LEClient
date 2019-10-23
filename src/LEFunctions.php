@@ -45,7 +45,7 @@ class LEFunctions
      * @param string	$directory		The directory in which to store the new keys. If set to null or empty string - privateKeyFile and publicKeyFile will be treated as absolute paths.
      * @param string	$privateKeyFile	The filename for the private key file.
      * @param string	$publicKeyFile  The filename for the public key file.
-     * @param string	$keySize 		RSA key size, must be between 2048 and 4096 (default is 4096)
+     * @param int	$keySize 		RSA key size, must be between 2048 and 4096 (default is 4096)
      */
 	public static function RSAGenerateKeys($directory, $privateKeyFile = 'private.pem', $publicKeyFile = 'public.pem', $keySize = 4096)
 	{
@@ -95,7 +95,7 @@ class LEFunctions
      * @param string	$directory		The directory in which to store the new keys. If set to null or empty string - privateKeyFile and publicKeyFile will be treated as absolute paths.
      * @param string	$privateKeyFile	The filename for the private key file.
      * @param string	$publicKeyFile  The filename for the public key file.
-     * @param string	$keysize  		EC key size, possible values are 256 (prime256v1) or 384 (secp384r1), default is 256
+     * @param int   	$keySize  		EC key size, possible values are 256 (prime256v1) or 384 (secp384r1), default is 256
      */
 	public static function ECGenerateKeys($directory, $privateKeyFile = 'private.pem', $publicKeyFile = 'public.pem', $keySize = 256)
 	{
@@ -170,7 +170,7 @@ class LEFunctions
     /**
      * Outputs a log message.
      *
-     * @param string	$data		The data to print.
+     * @param mixed 	$data		The data to print.
      * @param string	$function	The function name to print above. Defaults to the calling function's name from the stacktrace. (optional)
      */
 	public static function log($data, $function = '')

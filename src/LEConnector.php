@@ -273,7 +273,7 @@ class LEConnector
 	/**
      * Generates a Key ID signature to attach to the request.
      *
-     * @param array 	$payload		The payload to add to the signature.
+     * @param array|string 	$payload		The payload to add to the signature.
 	 * @param string	$kid			The Key ID to use in the signature.
      * @param string	$url 			The URL to use in the signature.
      * @param string 	$privateKeyFile The private key to sign the request with. Defaults to 'private.pem'. Defaults to accountKeys[private_key].

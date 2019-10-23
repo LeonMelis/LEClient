@@ -71,8 +71,9 @@ class LEOrder
      * @param string 		$keyType 			Type of the key we want to use for certificate. Can be provided in ALGO-SIZE format (ex. rsa-4096 or ec-256) or simple "rsa" and "ec" (using default sizes)
      * @param string 		$notBefore 			A date string formatted like 0000-00-00T00:00:00Z (yyyy-mm-dd hh:mm:ss) at which the certificate becomes valid.
      * @param string 		$notAfter 			A date string formatted like 0000-00-00T00:00:00Z (yyyy-mm-dd hh:mm:ss) until which the certificate is valid.
+     * @param bool          $OCSPMustStaple     Set true to order the cert with Must-Staple extension
      */
-	public function __construct($connector, $log, $certificateKeys, $basename, $domains, $keyType = 'rsa-4096', $notBefore, $notAfter, $OCSPMustStaple = false)
+	public function __construct($connector, $log, $certificateKeys, $basename, $domains, $keyType, $notBefore, $notAfter, $OCSPMustStaple = false)
 	{
 		$this->connector = $connector;
 		$this->basename = $basename;
@@ -124,7 +125,7 @@ class LEOrder
 							$this->log->info('Domains do not match order data. Renaming current files and creating new order.');
 						}
 						elseif($this->log >= LECLient::LOG_STATUS) LEFunctions::log('Domains do not match order data. Renaming current files and creating new order.', 'function LEOrder __construct');
-						$this->createOrder($domains, $notBefore, $notAfter, $keyType);
+						$this->createOrder($domains, $notBefore, $notAfter);
 					}
 					else
 					{
@@ -315,7 +316,7 @@ class LEOrder
      * @param int	$type	The type of verification to get. Supporting http-01 and dns-01. Supporting LEOrder::CHALLENGE_TYPE_HTTP and LEOrder::CHALLENGE_TYPE_DNS. Throws
 	 *						a Runtime Exception when requesting an unknown $type. Keep in mind a wildcard domain authorization only accepts LEOrder::CHALLENGE_TYPE_DNS.
      *
-     * @return object	Returns an array with verification data if successful, false if not pending LetsEncrypt Authorization instances were found. The return array always
+     * @return array|false	Returns an array with verification data if successful, false if not pending LetsEncrypt Authorization instances were found. The return array always
 	 *					contains 'type' and 'identifier'. For LEOrder::CHALLENGE_TYPE_HTTP, the array contains 'filename' and 'content' for necessary the authorization file.
 	 *					For LEOrder::CHALLENGE_TYPE_DNS, the array contains 'DNSDigest', which is the content for the necessary DNS TXT entry.
      */
