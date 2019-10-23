@@ -96,10 +96,11 @@ class LEAccount
 
 		$sign = $this->connector->signRequestJWK(array('contact' => $contact, 'termsOfServiceAgreed' => true), $this->connector->newAccount);
 		$post = $this->connector->post($this->connector->newAccount, $sign);
-		if(strpos($post['header'], "201 Created") !== false)
-		{
-			if(preg_match('~Location: (\S+)~i', $post['header'], $matches)) return trim($matches[1]);
+
+		if ($post['code'] === 201 && preg_match('~Location: (\S+)~i', $post['header'], $matches)) {
+		    return trim($matches[1]);
 		}
+
 		return false;
 	}
 
@@ -113,10 +114,10 @@ class LEAccount
 		$sign = $this->connector->signRequestJWK(array('onlyReturnExisting' => true), $this->connector->newAccount);
 		$post = $this->connector->post($this->connector->newAccount, $sign);
 
-		if(strpos($post['header'], "200 OK") !== false)
-		{
-			if(preg_match('~Location: (\S+)~i', $post['header'], $matches)) return trim($matches[1]);
+		if ($post['code'] === 200 && preg_match('~Location: (\S+)~i', $post['header'], $matches)) {
+		    return trim($matches[1]);
 		}
+
 		return false;
 	}
 
@@ -127,7 +128,7 @@ class LEAccount
 	{
 		$sign = $this->connector->signRequestKid(array('' => ''), $this->connector->accountURL, $this->connector->accountURL);
 		$post = $this->connector->post($this->connector->accountURL, $sign);
-		if(strpos($post['header'], "200 OK") !== false)
+		if ($post['code'] === 200)
 		{
 			$this->id = isset($post['body']['id']) ? $post['body']['id'] : null;
 			$this->key = $post['body']['key'];
@@ -156,7 +157,7 @@ class LEAccount
 
 		$sign = $this->connector->signRequestKid(array('contact' => $contact), $this->connector->accountURL, $this->connector->accountURL);
 		$post = $this->connector->post($this->connector->accountURL, $sign);
-		if(strpos($post['header'], "200 OK") !== false)
+		if ($post['code'] === 200)
 		{
             $this->id = isset($post['body']['id']) ? $post['body']['id'] : null;
 			$this->key = $post['body']['key'];
@@ -196,7 +197,7 @@ class LEAccount
 		$outerPayload = $this->connector->signRequestJWK($innerPayload, $this->connector->keyChange, $this->accountKeys['private_key'].'.new');
 		$sign = $this->connector->signRequestKid($outerPayload, $this->connector->accountURL, $this->connector->keyChange);
 		$post = $this->connector->post($this->connector->keyChange, $sign);
-		if(strpos($post['header'], "200 OK") !== false)
+		if($post['code'] === 200)
 		{
 			unlink($this->accountKeys['private_key']);
 			unlink($this->accountKeys['public_key']);
@@ -227,7 +228,7 @@ class LEAccount
 	{
 		$sign = $this->connector->signRequestKid(array('status' => 'deactivated'), $this->connector->accountURL, $this->connector->accountURL);
 		$post = $this->connector->post($this->connector->accountURL, $sign);
-		if(strpos($post['header'], "200 OK") !== false)
+		if($post['code'] === 200)
 		{
 			$this->connector->accountDeactivated = true;
 			if($this->log instanceof \Psr\Log\LoggerInterface) 
@@ -235,6 +236,8 @@ class LEAccount
 				$this->log->info('Account deactivated.');
 			}
 			elseif($this->log >= LECLient::LOG_STATUS) LEFunctions::log('Account deactivated.', 'function deactivateAccount');
+
+			return true;
 		}
 		else
 		{

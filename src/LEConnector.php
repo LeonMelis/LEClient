@@ -91,7 +91,7 @@ class LEConnector
      */
 	private function getNewNonce()
 	{
-		if(strpos($this->head($this->newNonce)['header'], "200 OK") == false) throw new \RuntimeException('No new nonce.');
+		if($this->head($this->newNonce)['code'] !== 200) throw new \RuntimeException('No new nonce.');
 	}
 
     /**
@@ -158,7 +158,7 @@ class LEConnector
         $body = substr($response, $header_size);
 
 		$jsonbody = json_decode($body, true);
-		$jsonresponse = array('request' => $method . ' ' . $requestURL, 'header' => $header, 'body' => $jsonbody === null ? $body : $jsonbody);
+		$jsonresponse = array('request' => $method . ' ' . $requestURL, 'header' => $header, 'body' => $jsonbody === null ? $body : $jsonbody, 'code' => $response_code);
 		if($this->log instanceof \Psr\Log\LoggerInterface)
 		{
 			$this->log->debug($method . ' response received', $jsonresponse);
@@ -166,18 +166,10 @@ class LEConnector
 		elseif($this->log >= LECLient::LOG_DEBUG) LEFunctions::log($jsonresponse);
 
 		if ($response_code !== 200 && $response_code !== 201) {
-            throw new \RuntimeException('Invalid response. Header: ' . $header . ' Body: ' . $body);
+            throw new \RuntimeException('Invalid response. Code: ' . $response_code . ' Header: ' . $header . ' Body: ' . $body);
         }
 
-		// Leon: this is the old method by yourivw, but this breaks when LE responds with a HTTP/2 response,
-        // it's also not very efficient either, so we replaced this with the CURLINFO_RESPONSE_CODE
-//		if(	(($method == 'POST' OR $method == 'GET') AND strpos($header, "200 OK") === false AND strpos($header, "201 Created") === false) OR
-//			($method == 'HEAD' AND strpos($header, "200 OK") === false))
-//		{
-//			throw new \RuntimeException('Invalid response. Header: ' . $header . ' Body: ' . $body);
-//		}
-
-		if(preg_match('~Replay\-Nonce: (\S+)~i', $header, $matches))
+		if(preg_match('~Replay-Nonce: (\S+)~i', $header, $matches))
 		{
 			$this->nonce = trim($matches[1]);
 			$this->nonceTime = time();
