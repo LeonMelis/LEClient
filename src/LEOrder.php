@@ -92,7 +92,7 @@ class LEOrder
 		}
 		else
 		{
-			preg_match_all('/^(rsa|ec)\-([0-9]{3,4})$/', $keyType, $keyTypeParts, PREG_SET_ORDER, 0);
+			preg_match_all('/^(rsa|ec)-([0-9]{3,4})$/', $keyType, $keyTypeParts, PREG_SET_ORDER, 0);
 
 			if (!empty($keyTypeParts))
 			{
