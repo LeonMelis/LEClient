@@ -107,6 +107,13 @@ class LEOrder
 		if(file_exists($this->certificateKeys['private_key']) AND file_exists($this->certificateKeys['order']) AND file_exists($this->certificateKeys['public_key']))
 		{
 			$this->orderURL = file_get_contents($this->certificateKeys['order']);
+
+            if($this->log instanceof \Psr\Log\LoggerInterface)
+            {
+                $this->log->info('Found existing order \'' . $this->certificateKeys['order'] . '\'');
+            }
+            elseif($this->log >= LECLient::LOG_STATUS) LEFunctions::log('Found existing order for \'' . $this->basename . '\'');
+
 			if (filter_var($this->orderURL, FILTER_VALIDATE_URL))
 			{
 				$get = $this->connector->get($this->orderURL);
