@@ -79,6 +79,10 @@ class LEConnector
 	private function getLEDirectory()
 	{
 		$req = $this->get('/directory');
+		if ($req['code'] !== 200) {
+		    throw new \RuntimeException('Cannot fetch directories: ' . $req['code'] . ' ' . $req['header'] . PHP_EOL . $req['body']);
+        }
+
 		$this->keyChange = $req['body']['keyChange'];
 		$this->newAccount = $req['body']['newAccount'];
 		$this->newNonce = $req['body']['newNonce'];
@@ -165,7 +169,9 @@ class LEConnector
 		}
 		elseif($this->log >= LECLient::LOG_DEBUG) LEFunctions::log($jsonresponse);
 
-		if ($response_code !== 200 && $response_code !== 201) {
+		// Note: original code threw exception here on code other than 200 or 201, but this broke order invalidation (404).
+        // So we made sure all calls to get(), post() and head() checked response code, and only throw here on 500
+		if ($response_code >= 500) {
             throw new \RuntimeException('Invalid response. Code: ' . $response_code . ' Header: ' . $header . ' Body: ' . $body);
         }
 
@@ -174,9 +180,9 @@ class LEConnector
 			$this->nonce = trim($matches[1]);
 			$this->nonceTime = time();
 		}
-		else
+		else if($method == 'POST')
 		{
-			if($method == 'POST') $this->getNewNonce(); // Not expecting a new nonce with GET and HEAD requests.
+		    $this->getNewNonce(); // Not expecting a new nonce with GET and HEAD requests.
 		}
 
         return $jsonresponse;
