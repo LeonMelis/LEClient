@@ -151,13 +151,17 @@ class LEClient
 	}
 
 
-	private function buildKeysObj($certificateKeys) {
+	private function buildKeysObj($certificateKeysDir) {
+	    if (substr($certificateKeysDir, -1) !== DIRECTORY_SEPARATOR) {
+	        $certificateKeysDir .= DIRECTORY_SEPARATOR;
+        }
+
         return array(
-            "public_key" => $certificateKeys.'/public.pem',
-            "private_key" => $certificateKeys.'/private.pem',
-            "certificate" => $certificateKeys.'/certificate.crt',
-            "fullchain_certificate" => $certificateKeys.'/fullchain.crt',
-            "order" => $certificateKeys.'/order'
+            "public_key" => $certificateKeysDir . 'public.pem',
+            "private_key" => $certificateKeysDir . 'private.pem',
+            "certificate" => $certificateKeysDir . 'certificate.crt',
+            "fullchain_certificate" => $certificateKeysDir . 'fullchain.crt',
+            "order" => $certificateKeysDir . 'order'
         );
     }
 
