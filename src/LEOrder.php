@@ -248,7 +248,7 @@ class LEOrder
 			}
 			else
 			{
-				throw new \RuntimeException('Creating new order failed.');
+				throw new \RuntimeException("Creating new order failed: HTTP code {$post['code']} !== 201");
 			}
 		}
 		else
