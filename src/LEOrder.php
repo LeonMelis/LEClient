@@ -243,7 +243,7 @@ class LEOrder
 				}
 				else
 				{
-					throw new \RuntimeException('New-order returned invalid response.');
+					throw new \RuntimeException('New-order returned invalid response. (no location header)');
 				}
 			}
 			else
