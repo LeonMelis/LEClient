@@ -95,7 +95,11 @@ class LEConnector
      */
 	private function getNewNonce()
 	{
-		if($this->head($this->newNonce)['code'] !== 200) throw new \RuntimeException('No new nonce.');
+	    $newNonce = $this->head($this->newNonce);
+	    
+		if ($newNonce['code'] !== 200) {
+		    throw new \RuntimeException("Could not request a nonce, got code {$newNonce['code']}");
+        }
 	}
 
     /**
