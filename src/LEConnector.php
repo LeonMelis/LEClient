@@ -184,7 +184,7 @@ class LEConnector
 			$this->nonce = trim($matches[1]);
 			$this->nonceTime = time();
 		}
-		else if($method == 'POST')
+		else if($method === 'POST')
 		{
 		    $this->getNewNonce(); // Not expecting a new nonce with GET and HEAD requests.
 		}
